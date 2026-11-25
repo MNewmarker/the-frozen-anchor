@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0b1320" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Frozen Anchor" />
+    <link rel="manifest" href="manifest.json" />
+    <title>The Frozen Anchor</title>
+    <style>
+        :root {
+            --bg: #0b1320;
+            --card: #152238;
+            --border: #263b5e;
+            --accent: #38bdf8;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --good: #34d399;
+            --warn: #fbbf24;
+            --danger: #f87171;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            padding: calc(16px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+            background: var(--bg);
+            color: var(--text);
+            max-width: 480px;
+            margin-inline: auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+        header h1 { margin: 0; font-size: 1.5rem; letter-spacing: 0.5px; color: var(--accent); }
+        header p { margin: 4px 0 0; font-size: 0.85rem; color: var(--muted); font-weight: 600; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+        label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+        select, input {
+            width: 100%;
+            padding: 13px 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            background: #0f172a;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+        select:focus, input:focus { outline: none; border-color: var(--accent); }
+        .toggle-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .toggle-btn {
+            padding: 13px 8px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #0f172a;
+            color: var(--muted);
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .toggle-btn.active { background: var(--accent); color: #08121e; border-color: var(--accent); }
+        .menu-btn {
+            width: 100%;
+            padding: 15px 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-align: left;
+            background: #0f172a;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .menu-btn small { display: block; font-size: 0.78rem; color: var(--accent); margin-top: 3px; }
+        .calc-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            background: var(--good);
+            color: #062117;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .calc-btn:active, .menu-btn:active, .toggle-btn:active { opacity: 0.85; }
+        .back-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-top: 6px;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        .banner {
+            display: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: rgba(248, 113, 113, 0.14);
+            border-left: 3px solid var(--danger);
+            color: var(--text);
+        }
+        .banner.info { background: rgba(56, 189, 248, 0.14); border-left-color: var(--accent); }
+        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat { background: #0f172a; padding: 12px; border-radius: 8px; border: 1px solid var(--border); text-align: center; }
+        .stat span { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
+        .stat strong { font-size: 1.3rem; color: var(--text); }
+        .stat small { display: block; font-size: 0.85rem; color: var(--accent); margin-top: 2px; }
+        .delta-box {
+            margin-top: 12px;
+            padding: 14px;
+            border-radius: 8px;
+            background: #0f172a;
+            border: 1px solid var(--good);
+            text-align: center;
+        }
+        .delta-box span { font-size: 0.85rem; color: var(--muted); display: block; }
+        .delta-box strong { font-size: 1.7rem; color: var(--good); }
+        .reminder {
+            font-size: 0.8rem;
+            color: var(--warn);
+            background: rgba(251, 191, 36, 0.1);
+            border-left: 3px solid var(--warn);
+            padding: 8px 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .disclaimer { font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+        .divider { border: 0; border-top: 1px solid var(--border); margin: 14px 0; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>⚓ THE FROZEN ANCHOR</h1>
+    <p>Built for Techs, by a Tech</p>
+</header>
+
+<div id="statusBanner" class="banner" role="alert"></div>
+
+<div class="card" id="disclaimerScreen">
+    <label>DISCLAIMER & SAFETY NOTICE</label>
+    <p class="disclaimer">
+        This application is intended strictly as a general reference and educational aid for qualified HVACR professionals.
+        It is not a comprehensive service guide and does not replace proper training, certification, or adherence to local
+        codes and regulations. Always follow the equipment manufacturer's official service instructions, charging specifications,
+        and safety guidelines—particularly when working with flammable (A2L/A3) or specialized refrigerants. By using this app,
+        you acknowledge that the developer assumes no responsibility or liability for any service performed, equipment damage,
+        or personal injury resulting from the use of this information.
+    </p>
+    <button type="button" id="beginBtn" class="calc-btn">TAP TO BEGIN</button>
+</div>
+
+<div class="card" id="menuScreen" style="display:none;">
+    <label>MAIN MENU</label>
+    <button type="button" id="openPtBtn" class="menu-btn">
+        1. P/T Chart Lookup & Superheat / Subcooling
+        <small>Pure, Blended & Transcritical Refrigerants</small>
+    </button>
+    <button type="button" id="playbookBtn" class="menu-btn">
+        2. Chief's Playbook: Beginner Tips & Top Ten Basics
+        <small>Coming in v2</small>
+    </button>
+    <button type="button" id="troubleshootBtn" class="menu-btn">
+        3. Full System Troubleshooting Tree & Ask the Chief
+        <small>Coming in v2</small>
+    </button>
+</div>
+
+<div id="ptScreen" style="display:none;">
+    <div class="card">
+        <label for="refSelect">1. SELECT REFRIGERANT</label>
+        <select id="refSelect"></select>
+
+        <label>2. LOOKUP BY</label>
+        <div class="toggle-row">
+            <button type="button" id="modePressBtn" class="toggle-btn active">PRESSURE (PSIG)</button>
+            <button type="button" id="modeTempBtn" class="toggle-btn">TEMPERATURE</button>
+        </div>
+
+        <div id="pressureSection">
+            <label>SYSTEM SIDE</label>
+            <div class="toggle-row">
+                <button type="button" id="sideHighBtn" class="toggle-btn active">HIGH SIDE (Discharge)</button>
+                <button type="button" id="sideLowBtn" class="toggle-btn">LOW SIDE (Suction)</button>
+            </div>
+            <label for="pressureInput">PRESSURE READING (PSIG / in. Hg vac.)</label>
+            <div style="display: flex; gap: 8px; align-items: stretch;">
+                <input type="text" id="pressureInput" inputmode="decimal" autocomplete="off" placeholder="e.g. 118.4 or -12.5" style="flex: 1; margin-bottom: 0;">
+                <button type="button" id="toggleNegPressBtn" class="btn-secondary" style="width: auto; padding: 0 16px; margin: 0; font-weight: 700; white-space: nowrap;">± VAC</button>
+            </div>
+        </div>
+
+        <div id="tempSection" style="display:none;">
+            <label>TEMPERATURE UNITS</label>
+            <div class="toggle-row">
+                <button type="button" id="lookupFBtn" class="toggle-btn active">FAHRENHEIT (°F)</button>
+                <button type="button" id="lookupCBtn" class="toggle-btn">CELSIUS (°C)</button>
+            </div>
+            <label for="tempInput" id="tempInputLabel">SATURATION TEMPERATURE (°F)</label>
+            <input type="text" id="tempInput" inputmode="decimal" autocomplete="off" placeholder="e.g. 40.0" />
+        </div>
+
+        <button type="button" id="ptCalcBtn" class="calc-btn">LOOKUP P/T</button>
+    </div>
+
+    <div class="card" id="resultsCard" style="display:none;">
+        <div class="result-grid" id="satGrid"></div>
+
+        <div id="deltaSection" style="display:none;">
+            <hr class="divider" />
+            <label id="deltaPromptLabel">WOULD YOU LIKE TO CALCULATE SUBCOOLING?</label>
+            <div class="toggle-row">
+                <button type="button" id="deltaYesBtn" class="toggle-btn">YES</button>
+                <button type="button" id="deltaNoBtn" class="toggle-btn active">NO (Done)</button>
+            </div>
+
+            <div id="deltaInputArea" style="display:none;">
+                <p class="reminder" id="fieldReminder"></p>
+                <label>LINE TEMPERATURE UNITS</label>
+                <div class="toggle-row">
+                    <button type="button" id="lineFBtn" class="toggle-btn active">FAHRENHEIT (°F)</button>
+                    <button type="button" id="lineCBtn" class="toggle-btn">CELSIUS (°C)</button>
+                </div>
+                <label for="lineTempInput" id="lineTempLabel">ACTUAL LIQUID LINE TEMPERATURE (°F)</label>
+                <input type="text" id="lineTempInput" inputmode="decimal" autocomplete="off" placeholder="e.g. 90.0" />
+                <button type="button" id="deltaCalcBtn" class="calc-btn">CALCULATE SUBCOOLING</button>
+            </div>
+
+            <div class="delta-box" id="deltaBox" style="display:none;"></div>
+        </div>
+    </div>
+
+    <button type="button" id="backToMenuBtn" class="back-btn">← BACK TO MAIN MENU</button>
+</div>
+
+<script src="app.js?v=13"></script>
+</body>
+</html>
